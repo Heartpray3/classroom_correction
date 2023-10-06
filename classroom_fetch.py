@@ -2,12 +2,17 @@ __author__ = 'Ely Cheikh Abass'
 __date__ = '2023-10-05'
 
 from dotenv import load_dotenv
+import subprocess
 import requests
 import json
 import os
 
-API_URL = 'https://api.github.com'
+RED = '\033[91m'
+RESET = '\033[0m'
 
+
+API_URL = 'https://api.github.com'
+PATH = ''
 load_dotenv()
 
 TOKEN = os.getenv('TOKEN')
@@ -48,41 +53,39 @@ def clone_accepted_assignment(classroom_name: str, assignment_name: str):
     classroom_id = get_classroom_id(classroom_name)
     assignment_id = get_assignment_id(classroom_id, assignment_name)
     accepted_assignments = get(f"{API_URL}/assignments/{assignment_id}/accepted_assignments")
-    with open('test.json', 'w') as f:
-        json.dump(accepted_assignments, f)
     number_of_repo = 0
+    deadline = accepted_assignments[0]['assignment']['deadline']
     for accepted_assignment in accepted_assignments:
         repo_url = accepted_assignment['repository']['html_url']
-        repo_name = accepted_assignment['repository']['full_name']
-        clone_cmd = f"git clone {repo_url} {OUTPUT_DIR}/{repo_name}"
-        checkout_cmd = f"git checkout -b correction {OUTPUT_DIR}/{repo_name}"
+        repo_name = accepted_assignment['repository']['full_name'].split('/')[1]
+
+        clone_cmd = f"git clone {repo_url} {repo_name}"
         number_of_repo += 1
+        os.chdir(PATH)
+        os.chdir(OUTPUT_DIR)
         os.system(clone_cmd)
-        os.system(checkout_cmd)
-        # print(f"Cloned {repo_name} repository of {accepted_assignments['students']}.")
+
+        # Find the latest commit before the deadline
+        os.chdir(f"{OUTPUT_DIR}/{repo_name}")
+        find_commit_cmd = f"git rev-list -1 --before='{deadline}' main"
+        result = os.popen(find_commit_cmd).read().strip()
+        if result:  # Check if there is a commit hash returned
+            checkout_cmd = f"git checkout -b correction {result}"
+            os.system(checkout_cmd)
+        else:
+            end_l = '\n' * 3
+            offset = 50 * '*'
+            print(end_l + offset + f"\n{RED}No commit found before deadline for repo {repo_name}{RESET}\n" + offset + end_l)
+
     print(f"Cloned {number_of_repo} from {assignment_name} in the classroom {classroom_name}")
 
 
 if __name__ == '__main__':
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+    PATH = os.getcwd()
     try:
-
         clone_accepted_assignment(CLASSROOM_NAME, ASSIGNMENT_NAME)
-        # with open("teams.json", "w") as f:
-        #     json.dump(get_organization_teams().json(), f)
-    #     # Fetch the list of students and their repositories
-    #     response = requests.get(API_URL, headers=headers)
-    #     response.raise_for_status()
-    #     students = response.json()
-    #     print(students)
-    #     # for student in students:
-    #     #     repo_url = student["repository_url"]
-    #     #     repo_name = student["login"]
-    #     #     print(student)
-    #
-    #         # Clone the repository
-    #         #
 
     except requests.exceptions.HTTPError as e:
         print(f"HTTP Error: {e}")
