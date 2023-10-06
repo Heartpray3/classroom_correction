@@ -1,0 +1,7 @@
+# Ignore everything
+*
+
+# But don't ignore .py files, README, and .gitignore
+!*.py
+!README*
+!.gitignore
