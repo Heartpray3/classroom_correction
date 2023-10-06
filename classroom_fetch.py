@@ -9,7 +9,8 @@ import os
 
 RED = '\033[91m'
 RESET = '\033[0m'
-
+END_L = '\n' * 3
+OFFSET = 50 * '*'
 
 API_URL = 'https://api.github.com'
 PATH = ''
@@ -73,9 +74,7 @@ def clone_accepted_assignment(classroom_name: str, assignment_name: str):
             checkout_cmd = f"git checkout -b correction {result}"
             os.system(checkout_cmd)
         else:
-            end_l = '\n' * 3
-            offset = 50 * '*'
-            print(end_l + offset + f"\n{RED}No commit found before deadline for repo {repo_name}{RESET}\n" + offset + end_l)
+            print(f"{END_L}{OFFSET}\n{RED}No commit found before deadline for repo {repo_name}{RESET}\n{OFFSET}{END_L}")
 
     print(f"Cloned {number_of_repo} from {assignment_name} in the classroom {classroom_name}")
 

@@ -1,7 +1,9 @@
 # Ignore everything
 *
 
-# But don't ignore .py files, README, and .gitignore
+# But don't ignore .py files, README, .gitignore and requirements
 !*.py
 !README*
 !.gitignore
+!requirements
+!LICENSE
