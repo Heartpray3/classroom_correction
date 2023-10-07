@@ -42,12 +42,13 @@ def clone_accepted_assignment(classroom_name: str, assignment_name: str):
     classroom_id = get_classroom_id(classroom_name)
     assignment_id = get_assignment_id(classroom_id, assignment_name)
     accepted_assignments = get(f"{API_URL}/assignments/{assignment_id}/accepted_assignments")
+    deadline = get(f"{API_URL}/assignments/{assignment_id}")['deadline']
     number_of_repo = 0
-    deadline = accepted_assignments[0]['assignment']['deadline']
+
     for accepted_assignment in accepted_assignments:
         repo_url = accepted_assignment['repository']['html_url']
-        repo_name = accepted_assignment['repository']['full_name'].split('/')[1]
-
+        repo_name = accepted_assignment['repository']['full_name']
+        repo_name = os.path.split(repo_name)[1]
         clone_cmd = f"git clone {repo_url} {repo_name}"
         number_of_repo += 1
         os.chdir(PATH)
@@ -55,7 +56,7 @@ def clone_accepted_assignment(classroom_name: str, assignment_name: str):
         os.system(clone_cmd)
 
         # Find the latest commit before the deadline
-        os.chdir(f"{OUTPUT_DIR}/{repo_name}")
+        os.chdir(os.path.join(OUTPUT_DIR, repo_name))
         find_commit_cmd = f"git rev-list -1 --before='{deadline}' main"
         result = os.popen(find_commit_cmd).read().strip()
         if result:  # Check if there is a commit hash returned
