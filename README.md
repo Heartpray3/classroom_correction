@@ -20,7 +20,6 @@ Ensure you have the following:
 
 1. Python installed on your machine.
 2. A GitHub Personal Access Token with the necessary permissions.
-3. The requirements 
 
 ### Setup
 

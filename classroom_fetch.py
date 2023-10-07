@@ -13,18 +13,6 @@ END_L = '\n' * 3
 OFFSET = 50 * '*'
 
 API_URL = 'https://api.github.com'
-PATH = ''
-load_dotenv()
-
-TOKEN = os.getenv('TOKEN')
-CLASSROOM_NAME = os.getenv('CLASSROOM_NAME')
-ASSIGNMENT_NAME = os.getenv('ASSIGNMENT_NAME')
-OUTPUT_DIR = os.getenv('OUTPUT_DIR')
-HEADERS = {
-    "Accept": "application/vnd.github+json",
-    "Authorization": f"Bearer {TOKEN}",
-    "X-GitHub-Api-Version": "2022-11-28"
-}
 
 
 def get(path: str):
@@ -80,6 +68,17 @@ def clone_accepted_assignment(classroom_name: str, assignment_name: str):
 
 
 if __name__ == '__main__':
+    load_dotenv()
+
+    TOKEN = os.getenv('TOKEN')
+    CLASSROOM_NAME = os.getenv('CLASSROOM_NAME')
+    ASSIGNMENT_NAME = os.getenv('ASSIGNMENT_NAME')
+    OUTPUT_DIR = os.getenv('OUTPUT_DIR')
+    HEADERS = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {TOKEN}",
+        "X-GitHub-Api-Version": "2022-11-28"
+    }
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     PATH = os.getcwd()
