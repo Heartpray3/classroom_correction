@@ -1,24 +1,31 @@
-__author__ = 'Ely Cheikh Abass'
-__date__ = '2023-10-05'
+"""
+This script file does clone all repos from a given assignments in GitHub Classroom and creates a new branch from the
+last commit before the deadline. Tf there's no commit before the deadline after cloning it, the script displays that
+there's no commit before the deadline.
+
+Author: Ely Cheikh Abass
+Date: 2023-10-05
+"""
 
 from dotenv import load_dotenv
-import subprocess
 import requests
-import json
 import os
 import re
 import base64
+from variables import *
 
-RED = '\033[91m'
-RESET = '\033[0m'
-END_L = '\n' * 3
-OFFSET = 50 * '*'
 
-API_URL = 'https://api.github.com'
+def get_env(name: str):
+    return os.environ[name]
 
 
 def get(path: str):
-    response = requests.get(path, headers=HEADERS)
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {get_env('TOKEN')}",
+        "X-GitHub-Api-Version": "2022-11-28"
+    }
+    response = requests.get(path, headers=headers)
     response.raise_for_status()
     return response.json()
 
@@ -41,7 +48,7 @@ def get_assignment_id(classroom_id: int, assignment_name: str):
 
 
 def write_readme_correction():
-    content = get(f"{API_URL}/repos/{TEMPLATE_REPO}/contents/{PATH_DESCRIPTION}")
+    content = get(f"{API_URL}/repos/{get_env('TEMPLATE_REPO')}/contents/{get_env('PATH_DESCRIPTION')}")
 
     content = base64.b64decode(content['content']).decode('utf-8')
 
@@ -67,20 +74,20 @@ def clone_accepted_assignment(classroom_name: str, assignment_name: str):
     assignment_id = get_assignment_id(classroom_id, assignment_name)
     accepted_assignments = get(f"{API_URL}/assignments/{assignment_id}/accepted_assignments")
     deadline = get(f"{API_URL}/assignments/{assignment_id}")['deadline']
+    output_dir = get_env('OUTPUT_DIR')
+    current_dir = os.getcwd()
     number_of_repo = 0
 
     for accepted_assignment in accepted_assignments:
         repo_url = accepted_assignment['repository']['html_url']
         repo_name = accepted_assignment['repository']['full_name']
-        repo_name = os.path.split(repo_name)[1]
         clone_cmd = f"git clone {repo_url} {repo_name}"
         number_of_repo += 1
-        os.chdir(PATH)
-        os.chdir(OUTPUT_DIR)
+        os.chdir(os.path.join(current_dir, output_dir))
         os.system(clone_cmd)
 
         # Find the latest commit before the deadline
-        os.chdir(os.path.join(OUTPUT_DIR, repo_name))
+        os.chdir(os.path.join(output_dir, repo_name))
         find_commit_cmd = f"git rev-list -1 --before='{deadline}' main"
         result = os.popen(find_commit_cmd).read().strip()
         if result:  # Check if there is a commit hash returned
@@ -94,24 +101,12 @@ def clone_accepted_assignment(classroom_name: str, assignment_name: str):
 
 
 if __name__ == '__main__':
-    load_dotenv()
+    load_dotenv(dotenv_path='.env')
+    os.makedirs(get_env('OUTPUT_DIR'), exist_ok=True)
 
-    TOKEN = os.getenv('TOKEN')
-    CLASSROOM_NAME = os.getenv('CLASSROOM_NAME')
-    ASSIGNMENT_NAME = os.getenv('ASSIGNMENT_NAME')
-    OUTPUT_DIR = os.getenv('OUTPUT_DIR')
-    TEMPLATE_REPO = os.getenv('TEMPLATE_REPO')
-    PATH_DESCRIPTION = os.getenv('PATH_DESCRIPTION')
-    HEADERS = {
-        "Accept": "application/vnd.github+json",
-        "Authorization": f"Bearer {TOKEN}",
-        "X-GitHub-Api-Version": "2022-11-28"
-    }
-
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    PATH = os.getcwd()
     try:
-        clone_accepted_assignment(CLASSROOM_NAME, ASSIGNMENT_NAME)
+        clone_accepted_assignment(get_env('CLASSROOM_NAME'), get_env('ASSIGNMENT_NAME'))
+
     except requests.exceptions.HTTPError as e:
         print(f"HTTP Error: {e}")
     except Exception as e:
