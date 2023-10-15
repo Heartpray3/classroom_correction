@@ -1,6 +1,9 @@
 # GitHub Classroom Fetcher 🎓
 
-This tool is designed to automate the process of pulling repositories from assignments given in a GitHub classroom based on their names. Not just that, it also checks if the repositories have commits made before a specified deadline. If they do, the script checks out to a new branch named `correction` from that commit. The utility can also push to the appropriate repositories, making the entire correction process smoother.
+This tool is designed to automate the process of pulling repositories from assignments given in a GitHub classroom 
+based on their names. Not just that, it also checks if the repositories have commits made before a specified deadline. 
+If they do, the script checks out to a new branch named `correction` from that commit. The utility can also push to the 
+appropriate repositories, making the entire correction process smoother.
 
 ## Features 🌟
 
@@ -26,8 +29,8 @@ Ensure you have the following:
 1. Clone this repository:
 
 ```bash
-git clone https://github.com/Heartpray3/classroom_fetch.git
-cd classroom_fetch
+git clone https://github.com/Heartpray3/classroom_correction.git
+cd classroom_correction
 ```
 
 2. Set up the .env file 

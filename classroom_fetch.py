@@ -10,8 +10,6 @@ Date: 2023-10-05
 from dotenv import load_dotenv
 import requests
 import os
-import re
-import base64
 from variables import *
 
 
@@ -47,28 +45,6 @@ def get_assignment_id(classroom_id: int, assignment_name: str):
     return find_key(assignments, 'title', assignment_name)
 
 
-def write_readme_correction():
-    content = get(f"{API_URL}/repos/{get_env('TEMPLATE_REPO')}/contents/{get_env('PATH_DESCRIPTION')}")
-
-    content = base64.b64decode(content['content']).decode('utf-8')
-
-    # Step 2: Use a regular expression to extract the desired content
-    # The regular expression captures content starting from "## Barème de correction" to the next "##"
-    match = re.search(r'(## Barème de correction.*?)(?=##|$)', content, re.DOTALL)
-
-    if match:
-        extracted_content = match.group(1)
-    else:
-        raise KeyError("Section not found!")
-
-    extracted_content = re.sub(r'(?<=\| )(\d+)(?=\s*(\n|$))', r'note/\1', extracted_content)
-
-    # Step 3: Write the extracted content to a file in the desired repository
-    output_file_path = 'correction.md'
-    with open(output_file_path, 'w', encoding='utf-8') as f:
-        f.write(extracted_content)
-
-
 def clone_accepted_assignment(classroom_name: str, assignment_name: str):
     classroom_id = get_classroom_id(classroom_name)
     assignment_id = get_assignment_id(classroom_id, assignment_name)
@@ -93,7 +69,6 @@ def clone_accepted_assignment(classroom_name: str, assignment_name: str):
         if result:  # Check if there is a commit hash returned
             checkout_cmd = f"git checkout -b correction {result}"
             os.system(checkout_cmd)
-            write_readme_correction()
         else:
             print(f"{END_L}{OFFSET}\n{RED}No commit found before deadline for repo {repo_name}{RESET}\n{OFFSET}{END_L}")
 
@@ -106,7 +81,6 @@ if __name__ == '__main__':
 
     try:
         clone_accepted_assignment(get_env('CLASSROOM_NAME'), get_env('ASSIGNMENT_NAME'))
-
     except requests.exceptions.HTTPError as e:
         print(f"HTTP Error: {e}")
     except Exception as e:
