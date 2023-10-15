@@ -1,6 +1,6 @@
 """
 This script file does clone all repos from a given assignments in GitHub Classroom and creates a new branch from the
-last commit before the deadline. Tf there's no commit before the deadline after cloning it, the script displays that
+last commit before the deadline. If there's no commit before the deadline after cloning it, the script displays that
 there's no commit before the deadline.
 
 Author: Ely Cheikh Abass
