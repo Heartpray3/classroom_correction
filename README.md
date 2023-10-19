@@ -42,6 +42,7 @@ TOKEN=your_github_token
 ASSIGNMENT_NAME=name_of_the_assignment
 CLASSROOM_NAME=name_of_the_classroom
 ```
+__Note : the output directory doesn't have to already exist, it can be in a relative path or an absolute path__
 
 ## License 📄
 
