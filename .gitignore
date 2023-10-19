@@ -2,6 +2,7 @@
 *
 
 # But don't ignore .py files, README, .gitignore and requirements
+!src/
 !src/*.py
 !README*
 !.gitignore
